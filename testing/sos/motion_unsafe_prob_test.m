@@ -8,8 +8,8 @@ x = sdpvar(2,1);
 % sigma = 0.1;
 % f =  [x(2); -(x(1) +x(2) + 0.5*x(1)^3)];
 % g = sigma * [0;1];
-f =  [-x(2); x(1)];
-g = [0; 0.1];
+f =  2*[-x(2); x(1)];
+g = 2*[0; 0.1];
 
 
 %% unsafe set
@@ -47,13 +47,13 @@ d = 2*order;
 x0 = [0; 0.75];
 
 %% Support Sets
-T = 2;
+T = 1;
 Xmax = 1.5;
-Xall = struct('ineq', [t*(1-t); Xmax.^2-x], 'eq', []);
+Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
 
 
 Xu = struct('ineq', unsafe_cons, 'eq', []);
-Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xmax.^2-x], 'eq', []);
+Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xmax.^2-x.^2], 'eq', []);
 
 
 %% polynomials

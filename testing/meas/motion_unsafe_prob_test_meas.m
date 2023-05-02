@@ -15,12 +15,12 @@ d = 2*order; %0.2793, f = [0; 0], g=[0; 0.1];
 %% problem parameters
 % f_func = @(x) [x(2); -x(1) + (1/3).* x(1).^3 - x(2) ];
 % f_func = @(x) [0; 0]; %order 5: prob = 0.2793
-f_func = @(x) [-x(2); x(1)]; %order 5: prob = 0.0877
+f_func = @(x) 2*[-x(2); x(1)]; %order 5: prob = 0.0877
 % g_func = @(x) [1; 1]*0.4;
-g_func = @(x) [0; 1]*0.1;
+g_func = @(x) 2*[0; 1]*0.1;
 
 % Tmax = 5;
-Tmax = 2;
+Tmax = 1;
 BOX = 1.5;
 
 %initial set
