@@ -4,14 +4,11 @@
 t = sdpvar(1,1);
 x = sdpvar(2,1);
 
-% b = -0.1;
-% sigma = 0.1;
-% f =  [x(2); -(x(1) +x(2) + 0.5*x(1)^3)];
-% g = sigma * [0;1];
 % f =  2*[-x(2); x(1)];
-
 f = 2*[0; -1];
 g = 2*[0; 0.1];
+
+
 
 %% unsafe set
 
@@ -48,7 +45,7 @@ d = 2*order;
 x0 = [0; 0.75];
 
 %% Support Sets
-T = 1;
+T =2;
 Xmax = 1.5;
 Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
 
@@ -56,15 +53,31 @@ Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
 Xu = struct('ineq', unsafe_cons, 'eq', []);
 Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xmax.^2-x.^2], 'eq', []);
 
+%boundary
+bXu = struct('ineq', [], 'eq', unsafe_cons);
+bXuall = struct('ineq', [t*(1-t)], 'eq', unsafe_cons);
+
 
 %% polynomials
 %polynomial definition
 [v, cv, mv] = polynomial([t;x], d);
+[ut, cut, mut] = polynomial([t;x], d);
+[ux1, cux1, mux1] = polynomial([t;x], d);
+[ux2, cux2, mux2] = polynomial([t;x], d);
+
+ux = [ux1; ux2];
+cux = [cux1; cux2];
+mux = [mux1; mux2];
 
 fT = T*f;
 gT = T*g;
 
 Lv = jacobian(v, t) + jacobian(v, x)*fT + 0.5*(gT)'*hessian(v, x)*(gT);
+
+du = jacobian(ux1, x(1)) + jacobian(ux2, x(2)) + jacobian(ut, t);
+
+ut0 = replace(ut, t, 0);
+ut1 = replace(ut, t, 1);
 
 v0 = replace(v, [t;x], [0; x0]);
 
@@ -72,11 +85,23 @@ objective = v0;
 
 [put_lie, conslie, coefflie] = constraint_psatz(-Lv, Xall, [t;x], d);
 [put_base, consbase, coeffbase] = constraint_psatz(v, Xall, [t;x], d);
-[put_unsafe, consunsafe, coeffunsafe] = constraint_psatz(v-1, Xuall, [t;x], d);
+[put_unsafe, consunsafe, coeffunsafe] = constraint_psatz(v-1-du, Xuall, [t;x], d);
+[put_utstart, consutstart, coeffutstart] = constraint_psatz(-ut0, Xu, [x], d); % -(t)
+[put_utend, consutend, coeffutend] = constraint_psatz(ut1, Xu, [x], d);    % -(T-t)
+[put_ux, consux, coeffux] = constraint_psatz(-jacobian(unsafe_cons, x)*ux, bXuall, [t; x], d+1); % -g(x)
 
-cons = [conslie:'lie'; consbase:'base'; consunsafe:'unsafe'];
-coeff = [coefflie; coeffbase; coeffunsafe; cv];
 
+
+cons = [conslie:'lie'; consbase:'base'; consunsafe:'unsafe'; consutstart:'utstart'; consutend:'utend'; consux:'ux'];
+coeff = [coefflie; coeffbase; coeffunsafe; cv; cux; cut; coeffutstart; coeffutend; coeffux];
+
+cons_nullu = [cux==0; cut==0];
+
+NULL_U = 0;
+
+if NULL_U   
+    cons = [cons_nullu; cons];
+end
 opts = sdpsettings('solver', 'mosek');
 
 
