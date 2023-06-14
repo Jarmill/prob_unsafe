@@ -5,13 +5,13 @@ t = sdpvar(1,1);
 x = sdpvar(2,1);
 
 % b = -0.1;
-% sigma = 0.1;
+sigma = 0.2;
 % f =  [x(2); -(x(1) +x(2) + 0.5*x(1)^3)];
-% g = sigma * [0;1];
-% f =  2*[-x(2); x(1)];
+g = sigma * [0;1];
+f =  2*[-x(2); x(1)];
 
-f = 2*[0; -1];
-g = 2*[0; 0.1];
+% f = 2*[0; -1];
+% g = 2*[0; 0.1];
 
 %% unsafe set
 
@@ -38,9 +38,9 @@ unsafe_cons = c1f;
 
 % order = 1;
 % order = 2;
-order = 3;
+% order = 3;
 % order = 4; 
-% order = 5; 
+order = 5; 
 % order = 6; 
 d = 2*order;
 
