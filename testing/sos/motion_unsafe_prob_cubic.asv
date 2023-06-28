@@ -50,8 +50,8 @@ x0 = [0.85; -0.75]; %order 6 prb <= 3.0565354310e-01 (need to simulate)
 % T = 5;
 T = 5;
 % Xmax = 1.5;
-% Xmax = 2;
-Xmax = 2.5;
+Xmax = 2;
+% Xmax = 2.5;
 Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
 
 
@@ -71,15 +71,27 @@ Lv = jacobian(v, t) + jacobian(v, x)*fT + 0.5*(gT)'*hessian(v, x)*(gT);
 
 v0 = replace(v, [t], [0]);
 
+%toggles for different experiments
 LEBESGUE = 0;
+CIRC = 0;
+
+consinit = [];
+coeffinit = [];
 
 if LEBESGUE
     leb = LebesgueBoxMom( d, [-Xmax, Xmax; -Xmax, Xmax]',1);
     w_leb = cw'*leb;
     objective = w_leb;
 else
-    v0x = replace(v0, x, x0);
-    objective = v0x;
+    if CIRC
+        R0 = 0.1;
+        X0 = struct('ineq', R0^2 - sum(x.^2), 'eq', []);
+        [put_init, consinit, coeffinit] = constraint_psatz(gamma-v0, X0, x, d);
+
+    else
+        v0x = replace(v0, x, x0);
+        objective = v0x;
+    end
 end
 
 zero_con = (coefficients(v0 - w, x)==0);
@@ -105,6 +117,7 @@ obj_rec = value(objective);
 %% plotting
 wp = polyval_func(v0_rec, x);
 figure(1)
+clf
 fsurf(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5])
 xlabel('x_1')
 ylabel('x_2')
@@ -118,12 +131,19 @@ Xu = Cu + circ_half* Ru;
 view(-8, 65)
 
 figure(2)
+clf
 hold on
 fcontour(@(x, y) wp([x; y]), [-Xmax, Xmax, -Xmax, Xmax], 'levellist', 0:0.1:1, 'fill', 1)
 patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
 
 if ~LEBESGUE
-    scatter(x0(1), x0(2), 200, 'magenta', 'filled')
+    if CIRC
+        theta_full = linspace(0, 2*pi, 200);        
+        circ = [cos(theta_full); sin(theta_full)];
+        plot(cos(theta_full), sin(theta_full), 'LineWidth', 3)
+    else
+        scatter(x0(1), x0(2), 200, 'magenta', 'filled')
+    end
 end
 axis square
 xlabel('x_1')
