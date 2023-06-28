@@ -15,7 +15,7 @@ g = sigma * [0;1];
 
 %% unsafe set
 
-theta_c = 5*pi/4; 
+% theta_c = 5*pi/4; 
 Cu = [-0.5; -0.75]; %original parameters
 % % Ru = 0.5;
 
@@ -40,19 +40,22 @@ unsafe_cons = [c1f; c2f];
 % x0 = [0.75; 0];
 x0 = [0.85; -0.75]; %order 6 prb <= 3.0565354310e-01 (need to simulate)
 
+Xbox = Xmax.^2-x.^2;
+
 %% Support Sets
 % T = 1;
 % T = 3;
 % T = 5;
 T = 5;
 % Xmax = 1.5;
-Xmax = 2;
+% Xmax = 2;
+Xmax = 1.25;
 % Xmax = 2.5;
-Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
+Xall = struct('ineq', [t*(1-t); Xbox], 'eq', []);
 
 
 Xu = struct('ineq', unsafe_cons, 'eq', []);
-Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xmax.^2-x.^2], 'eq', []);
+Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xbox], 'eq', []);
 
 
 %% polynomials
@@ -71,7 +74,7 @@ Lv = jacobian(v, t) + jacobian(v, x)*fT + 0.5*(gT)'*hessian(v, x)*(gT);
 v0 = replace(v, [t], [0]);
 
 %toggles for different experiments
-LEBESGUE = 1;
+LEBESGUE = 0;
 CIRC = 1;
 
 consinit = [];
@@ -131,6 +134,7 @@ circ_half = [cos(theta_half_range); sin(theta_half_range)];
 Xu = Cu + circ_half* Ru;
 view(-8, 65)
 
+%% visualize
 figure(2)
 clf
 hold on
