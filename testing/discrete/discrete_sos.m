@@ -1,5 +1,5 @@
 %2d discrete-time dynamics
-
+yalmip('clear')
 %% variables and dynamics
 t = sdpvar(1,1);
 x = sdpvar(2,1);
@@ -29,7 +29,7 @@ unsafe_cons = [c1f; c2f];
 
 %% put together the constraints
 
-order = 2; 
+order =6; 
 d = 2*order;
 
 
@@ -66,7 +66,7 @@ v0 = replace(v, [t], [0]);
 
 %toggles for different experiments
 LEBESGUE = 0;
-CIRC = 1;
+CIRC = 0;
 
 consinit = [];
 coeffinit = [];
@@ -106,9 +106,12 @@ opts = sdpsettings('solver', 'mosek');
 [sol,u,Q] = solvesos(cons,objective,opts,coeff);
 
 
+disp(value(objective));
+
 %% recovery
 v_rec = value(cv)'*mv;
 v0_rec = replace(v_rec, t, 0);
+v00_rec = replace(v_rec, [t; x], [0; x0]);
 obj_rec = value(objective);
 
 %% plotting
@@ -136,6 +139,16 @@ axis square
 xlabel('x_1')
 ylabel('x_2')
 colorbar
+
+if ~LEBESGUE
+    if CIRC
+        theta_full = linspace(0, 2*pi, 200);        
+%         circ = [cos(theta_full); sin(theta_full)];
+        plot(R0*cos(theta_full) + x0(1), R0*sin(theta_full)+ x0(2), 'm', 'LineWidth', 3)
+    else
+        scatter(x0(1), x0(2), 200, 'magenta', 'filled')
+    end
+end
 title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
 % fprintf('Prob unsafe <= %0.4f \n', obj_rec);
 % disp(obj_rec)
