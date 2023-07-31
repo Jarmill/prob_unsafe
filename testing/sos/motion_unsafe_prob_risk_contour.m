@@ -36,7 +36,7 @@ unsafe_cons = [c1f; c2f];
 
 %% put together the constraints
 
-order = 6; 
+order = 4; 
 d = 2*order;
 
 
@@ -44,9 +44,9 @@ x0 = [0; 0.75];
 
 %% Support Sets
 % T = 1;
-% T = 3;
+T = 3;
 % T = 5;
-T = 8;
+% T = 8;
 Xmax = 1.5;
 Xall = struct('ineq', [t*(1-t); Xmax.^2-x.^2], 'eq', []);
 

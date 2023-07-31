@@ -58,7 +58,7 @@ for k=1:(Ntraj/2)
 end  
 
 th = linspace(0, 2*pi, 300);
-plot(R0*cos(th)+C0(1), R0*sin(th)+C0(2), 'k', 'linewidth', 2)
+plot(R0*cos(th)+C0(1), R0*sin(th)+C0(2), 'm', 'linewidth', 2)
 pbaspect([diff(xlim), diff(ylim), 1])
 
 
