@@ -35,8 +35,8 @@ T = 10;
 smp = struct('x', @() R0*ball_sample(1, 2)' + C0, 'w', @() randn(1)*w0/2);
 % smp = struct('x', @() R0*sphere_sample(1, 2)' + C0, 'w', @() (2*rand(1)-1) * w0);
 
-x_curr = x0;
-Ntraj = 1500;
+% Ntraj = 1500;
+Ntraj = 5000;
 traj = cell(Ntraj, 1);
 for k=1:Ntraj
     traj{k} = curr_traj(smp, T, f);
@@ -52,7 +52,7 @@ circ_half = [cos(theta_half_range); sin(theta_half_range)];
 Xu = Cu + circ_half* Ru;
 patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
 
-for k=1:Ntraj
+for k=1:(Ntraj/2)
     ct = traj{k};
     plot(ct(1, :), ct(2, :), '.c')
 end  
