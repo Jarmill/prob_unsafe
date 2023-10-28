@@ -64,7 +64,7 @@ v0 = replace(v, [t], [0]);
 
 % objective = v0;
 
-%toggles for different experiments
+%% toggles for different experiments
 LEBESGUE = 0;
 CIRC = 0;
 
@@ -108,7 +108,7 @@ opts = sdpsettings('solver', 'mosek');
 
 disp(value(objective));
 
-%% recovery
+% recovery
 v_rec = value(cv)'*mv;
 v0_rec = replace(v_rec, t, 0);
 v00_rec = replace(v_rec, [t; x], [0; x0]);
@@ -122,7 +122,7 @@ fsurf(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5])
 xlabel('x_1')
 ylabel('x_2')
 zlabel('Prob')
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 
 
 theta_half_range = linspace(theta_c-pi/2, theta_c + pi/2, 200);
@@ -149,6 +149,6 @@ if ~LEBESGUE
         scatter(x0(1), x0(2), 200, 'magenta', 'filled')
     end
 end
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 % fprintf('Prob unsafe <= %0.4f \n', obj_rec);
 % disp(obj_rec)
