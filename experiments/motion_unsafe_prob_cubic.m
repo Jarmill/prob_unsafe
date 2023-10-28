@@ -4,6 +4,8 @@
 t = sdpvar(1,1);
 x = sdpvar(2,1);
 
+PLOT = 0;
+
 % b = -0.1;
 sigma = 0.1;
 f =  [x(2); -(x(1) +x(2) + 0.5*x(1)^3)];
@@ -40,7 +42,7 @@ unsafe_cons = [c1f; c2f];
 % x0 = [0.75; 0];
 x0 = [0.85; -0.75]; %order 6 prb <= 3.0565354310e-01 (need to simulate)
 
-Xbox = Xmax.^2-x.^2;
+
 
 %% Support Sets
 % T = 1;
@@ -51,6 +53,7 @@ T = 5;
 % Xmax = 2;
 Xmax = 1.25;
 % Xmax = 2.5;
+Xbox = Xmax.^2-x.^2;
 Xall = struct('ineq', [t*(1-t); Xbox], 'eq', []);
 
 
@@ -60,7 +63,8 @@ Xuall = struct('ineq', [t*(1-t); Xu.ineq; Xbox], 'eq', []);
 
 %% polynomials
 %polynomial definition
-order =6; 
+% order =6; 
+order = 6;
 d = 2*order;
 
 [v, cv, mv] = polynomial([t;x], d);
@@ -74,8 +78,8 @@ Lv = jacobian(v, t) + jacobian(v, x)*fT + 0.5*(gT)'*hessian(v, x)*(gT);
 v0 = replace(v, [t], [0]);
 
 %toggles for different experiments
-LEBESGUE = 0;
-CIRC = 1;
+LEBESGUE = 1;
+CIRC = 0;
 
 consinit = [];
 coeffinit = [];
@@ -119,14 +123,19 @@ v0_rec = replace(v_rec, t, 0);
 obj_rec = value(objective);
 
 %% plotting
+
+if PLOT
 wp = polyval_func(v0_rec, x);
 figure(1)
 clf
-fsurf(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5])
+fsurf(@(x, y) min(1, wp([x; y])), [-1.5, 1.5, -1.5, 1.5])
 xlabel('x_1')
 ylabel('x_2')
+xlim([-Xmax, Xmax])
+ylim([-Xmax, Xmax])
 zlabel('Prob')
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+zlim([0, 1])
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 
 
 theta_half_range = linspace(theta_c-pi/2, theta_c + pi/2, 200);
@@ -135,10 +144,10 @@ Xu = Cu + circ_half* Ru;
 view(-8, 65)
 
 %% visualize
-figure(2)
+figure(4)
 clf
 hold on
-fcontour(@(x, y) wp([x; y]), [-Xmax, Xmax, -Xmax, Xmax], 'levellist', 0:0.1:1, 'fill', 1)
+fcontour(@(x, y) min(1, wp([x; y])), [-Xmax, Xmax, -Xmax, Xmax], 'levellist', 0:0.1:1, 'fill', 1)
 patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
 
 if ~LEBESGUE
@@ -153,7 +162,10 @@ end
 axis square
 xlabel('x_1')
 ylabel('x_2')
+xlim([-Xmax, Xmax])
+ylim([-Xmax, Xmax])
 colorbar
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 % fprintf('Prob unsafe <= %0.4f \n', obj_rec);
 % disp(obj_rec)
+end

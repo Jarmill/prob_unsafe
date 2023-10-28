@@ -100,6 +100,7 @@ cons_nullu = [cux==0; cut==0];
 NULL_U = 0;
 
 if NULL_U   
+
     cons = [cons_nullu; cons];
 end
 opts = sdpsettings('solver', 'mosek');

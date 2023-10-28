@@ -36,15 +36,15 @@ unsafe_cons = [c1f; c2f];
 
 %% put together the constraints
 
-order = 4; 
+order = 6; 
 d = 2*order;
 
 
 x0 = [0; 0.75];
 
 %% Support Sets
-% T = 1;
-T = 3;
+T = 1;
+% T = 3;
 % T = 5;
 % T = 8;
 Xmax = 1.5;
@@ -100,7 +100,7 @@ fsurf(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5])
 xlabel('x_1')
 ylabel('x_2')
 zlabel('Prob')
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 
 
 theta_half_range = linspace(theta_c-pi/2, theta_c + pi/2, 200);
@@ -116,6 +116,6 @@ axis square
 xlabel('x_1')
 ylabel('x_2')
 colorbar
-title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+title(sprintf('Unsafety Upper-Bound (T=%d)', T), 'FontSize', 16)
 % fprintf('Prob unsafe <= %0.4f \n', obj_rec);
 % disp(obj_rec)

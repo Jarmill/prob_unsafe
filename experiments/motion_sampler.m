@@ -39,7 +39,7 @@ ylabel('x_2')
 title('Sampled Trajectories', 'FontSize', 16)
 
 
-%% perform visualizatoin
+%% perform visualization
 figure(3)
 clf
 hold on
@@ -50,12 +50,13 @@ Xu = Cu + circ_half* Ru;
 
 theta_full = linspace(0, 2*pi, 200);        
 patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
-plot(R0*cos(theta_full) + x0(1), R0*sin(theta_full)+ x0(2), 'm', 'LineWidth', 3)
 
 for i = 1:Ntraj
     x_curr = x_traj{i};
     plot(x_curr(:, 1), x_curr(:, 2), 'c');
 end
+
+plot(R0*cos(theta_full) + x0(1), R0*sin(theta_full)+ x0(2), 'm', 'LineWidth', 3)
 
 
 
