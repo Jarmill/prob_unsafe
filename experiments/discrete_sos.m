@@ -65,7 +65,7 @@ v0 = replace(v, [t], [0]);
 % objective = v0;
 
 %% toggles for different experiments
-LEBESGUE = 0;
+LEBESGUE = 1;
 CIRC = 0;
 
 consinit = [];
