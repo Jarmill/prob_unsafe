@@ -1,8 +1,13 @@
-function moments = NormalMom(d)    
+function moments = NormalMom(dmin, dmax)    
 %moments 0..d of univariate unit (0,1) normal distribution
-    moments = zeros(d+1,1);
+    if nargin < 2
+        dmax = dmin;
+        dmin = 0;
+    end
+    mom_hits = dmin:dmax;
+    moments = zeros(length(mom_hits),1);
     for i = 1:numel(moments)
-        j = i-1;
+        j = mom_hits(i);
         if mod(j, 2)
             moments(i)=0;
         else
