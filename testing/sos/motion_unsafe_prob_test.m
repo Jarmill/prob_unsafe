@@ -37,10 +37,10 @@ unsafe_cons = c1f;
 %% put together the constraints
 
 % order = 1;
-% order = 2;
+order = 2;
 % order = 3;
 % order = 4; 
-order = 5; 
+% order = 5; 
 % order = 6; 
 d = 2*order;
 
@@ -85,8 +85,36 @@ opts = sdpsettings('solver', 'mosek');
 
 %% recovery
 v_rec = value(cv)'*mv;
-v0_rec = replace(v_rec, [t; x], [0; x0]);
+v0_rec = replace(v_rec, t, 0);
+v00_rec = replace(v_rec, [t; x], [0; x0]);
 obj_rec = value(objective);
 
 fprintf('Prob unsafe <= %0.4f \n', obj_rec);
+% disp(obj_rec)
+
+%% plotting
+wp = polyval_func(v0_rec, x);
+figure(1)
+fsurf(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5])
+xlabel('x_1')
+ylabel('x_2')
+zlabel('Prob')
+title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+
+
+theta_half_range = linspace(theta_c-pi/2, theta_c + pi/2, 200);
+circ_half = [cos(theta_half_range); sin(theta_half_range)];
+Xu = Cu + circ_half* Ru;
+view(-8, 65)
+
+figure(2)
+hold on
+fcontour(@(x, y) wp([x; y]), [-1.5, 1.5, -1.5, 1.5], 'levellist', 0:0.1:1, 'fill', 1)
+patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
+axis square
+xlabel('x_1')
+ylabel('x_2')
+colorbar
+title(sprintf('Probability of Unsafety (T=%d)', T), 'FontSize', 16)
+% fprintf('Prob unsafe <= %0.4f \n', obj_rec);
 % disp(obj_rec)
