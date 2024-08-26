@@ -42,14 +42,17 @@ figure(3)
 clf
 hold on
 
+c = linspecer(2);
+
 for i = 1:Ntraj
     x_curr = x_traj{i};
-    plot(x_curr(:, 1), x_curr(:, 2), 'c');
-    plot(x_curr(:,3), x_curr(:, 4), 'r');
+    plot(x_curr(:, 1), x_curr(:, 2), 'color', c(1, :));
+    plot(x_curr(:,3), x_curr(:, 4), 'color', c(2, :));
     % plot(x_curr(:, 5), x_curr(:, 6), 'g');
 end
-xlabel('position')
-ylabel('velocity')
+scatter(x0([1; 3]), x0([2; 4]), 300, 'filled', 'm')
+xlabel('$x_1(t), x_2(t)$', 'interpreter', 'latex', 'fontsize', 14)
+ylabel('$\dot{x}_1(t), \dot{x}_2(t)$', 'interpreter', 'latex', 'fontsize', 14)
 axis square
 % xl = [-Xmax, Xmax];
 % yl = [-Xmax, Xmax];
@@ -80,8 +83,8 @@ Ru = 0.15;
 % xl = xlim
 plot([0, T], [Ru, Ru], '--r', 'LineWidth', 3)
 xlim([0, T])
-ylabel('$x_2(t) - x_1(t)$', 'interpreter', 'latex')
-xlabel('$t$', 'interpreter', 'latex')
+ylabel('$x_2(t) - x_1(t)$', 'interpreter', 'latex', 'fontsize', 14)
+xlabel('$t$', 'interpreter', 'latex', 'fontsize', 14)
 
 function dx = f_dyn(t, x)
 %dynamics for transient stability

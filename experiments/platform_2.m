@@ -46,8 +46,9 @@ Xu1all = struct('ineq', [t*(1-t); Xu1.ineq; Xbox], 'eq', []);
 % order = 1; %1.000
 % order = 2; %   0.9236
 % order = 3; %    0.3068
-order = 4; %
-% order = 5;   %
+% order = 4; %0.1344
+order = 5;   %  0.1162
+order = 6; %out of memory
 
 d = 2*order;
 
