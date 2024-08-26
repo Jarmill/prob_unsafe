@@ -69,6 +69,7 @@ T = 5;
 Xmax = 1.25;
 % Xmax = 2.5;
 Xbox = Xmax.^2-x.^2;
+X = struct('ineq', Xbox, 'eq', []);
 Xall = struct('ineq', [t*(1-t); Xbox], 'eq', []);
 
 
@@ -93,7 +94,7 @@ Lv = jacobian(v, t) + jacobian(v, x)*fT + 0.5*(gT)'*hessian(v, x)*(gT);
 v0 = replace(v, [t], [0]);
 
 %toggles for different experiments
-LEBESGUE = 0;
+LEBESGUE = 1;
 CIRC = 1;
 
 consinit = [];
@@ -120,8 +121,30 @@ end
 zero_con = (coefficients(v0 - w, x)==0);
 
 [put_lie, conslie, coefflie] = constraint_psatz(-Lv, Xall, [t;x], d);
-[put_base, consbase, coeffbase] = constraint_psatz(v, Xall, [t;x], d);
+
 [put_unsafe, consunsafe, coeffunsafe] = constraint_psatz(v-1, Xuall, [t;x], d);
+
+%% exit measure
+%this is the complement measure
+%decompose it into parts
+vT = replace(v, t, 1);
+Xbox = Xmax.^2-x.^2;
+
+
+v_top = replace(v, x(2), Xmax);
+X_horz = struct('ineq', [t*(1-t); Xmax^2 - x(1)^2], 'eq', []);
+
+v_bot = replace(v, x(2), -Xmax);
+v_left = replace(v, x(1), Xmax);
+v_right = replace(v, x(1), -Xmax);
+
+
+
+[put_base, consbase, coeffbase] = constraint_psatz(v, Xall, [t;x], d);
+
+
+
+%% assemble all constraints
 
 cons = [conslie:'lie'; consbase:'base'; consunsafe:'unsafe'; zero_con:'zero'; consinit];
 coeff = [coefflie; coeffbase; coeffunsafe; cv; cw; coeffinit];

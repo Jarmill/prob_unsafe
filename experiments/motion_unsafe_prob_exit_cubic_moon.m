@@ -1,4 +1,4 @@
-%2d motion when drift term is constant
+%2d motion when drift term is cons\tant
 
 %% variables and dynamics
 t = sdpvar(1,1);
@@ -69,6 +69,7 @@ T = 5;
 Xmax = 1.25;
 % Xmax = 2.5;
 Xbox = Xmax.^2-x.^2;
+X = struct('ineq', Xbox, 'eq', []);
 Xall = struct('ineq', [t*(1-t); Xbox], 'eq', []);
 
 
@@ -120,8 +121,37 @@ end
 zero_con = (coefficients(v0 - w, x)==0);
 
 [put_lie, conslie, coefflie] = constraint_psatz(-Lv, Xall, [t;x], d);
-[put_base, consbase, coeffbase] = constraint_psatz(v, Xall, [t;x], d);
+
 [put_unsafe, consunsafe, coeffunsafe] = constraint_psatz(v-1, Xuall, [t;x], d);
+
+%% exit measure
+%this is the complement measure
+%decompose it into parts
+vT = replace(v, t, 1);
+
+[put_base_T, consbase_T, coeffbase_T] = constraint_psatz(vT, X, x, d);
+
+v_top = replace(v, x(2), Xmax);
+v_bot = replace(v, x(2), -Xmax);
+X_horz = struct('ineq', [t*(1-t); Xmax^2 - x(1)^2], 'eq', []);
+[put_base_top, consbase_top, coeffbase_top] = constraint_psatz(v_top, X_horz, [t; x(1)], d);
+[put_base_bot, consbase_bot, coeffbase_bot] = constraint_psatz(v_bot, X_horz, [t; x(1)], d);
+
+
+v_left = replace(v, x(1), Xmax);
+v_right = replace(v, x(1), -Xmax);
+X_vert = struct('ineq', [t*(1-t); Xmax^2 - x(2)^2], 'eq', []);
+[put_base_left, consbase_left, coeffbase_left] = constraint_psatz(v_left, X_vert, [t; x(2)], d);
+[put_base_right, consbase_right, coeffbase_right] = constraint_psatz(v_right, X_vert, [t; x(2)], d);
+
+consbase = [consbase_T; consbase_top; consbase_bot; consbase_left; consbase_right];
+coeffbase = [coeffbase_T; coeffbase_top; coeffbase_bot; coeffbase_left; coeffbase_right];
+
+% [put_base, consbase, coeffbase] = constraint_psatz(v, Xall, [t;x], d);
+
+
+
+%% assemble all constraints
 
 cons = [conslie:'lie'; consbase:'base'; consunsafe:'unsafe'; zero_con:'zero'; consinit];
 coeff = [coefflie; coeffbase; coeffunsafe; cv; cw; coeffinit];
