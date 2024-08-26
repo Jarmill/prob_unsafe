@@ -1,13 +1,14 @@
-%sample SDE for the motion system
+%sample SDE for transient stability system
 %requires https://www.mathworks.com/matlabcentral/fileexchange/56406-sdetools
+% https://arxiv.org/pdf/1811.01372
 rng(1, 'twister')
 
 
 %dynamics
-sigma = 0.1;
-f =  @(t, x) [x(3); x(4); -sin(x(1)) - 0.5*sin(x(1)-x(2))-0.4*x(3);...
-    -0.5*sin(x(2)) - 0.5*sin(x(2)-x(1)) - 0.5*x(2) + 0.05];
-g =  @(t, x) sigma * [0;0; 1; 0];
+% sigma = 0.25;
+sigma = 0.05;
+f =  @(t, x) f_dyn(t, x);
+g =  @(t, x) sigma * [0; -x(2)+1; 0; -x(4)+1];
 
 %set geometry
 dt = 1e-3;
@@ -16,22 +17,22 @@ dt = 1e-3;
 param = struct('dt', dt);
 Tmax = 8;
 % Tmax = 30;
-R0 = 0;
+
 
 %sampler
-x0 = [0.02; 0.06; 0.1; 0];
+% x0 = [-1; 0; 0; 0; 1; 0];
+x0 = [-0.25; 0.2; 0.5; 0.1];
 opts_fw = sdeset('EventsFun', @(t, x) stoch_event_motion(t, x, param),...
     'SDEType', 'Ito',  'DiagonalNoise', 'yes', 'ConstGFUN', 'yes');
 
-synclim = 0.2;
 
 
 %% perform sampling
-Ntraj = 200;
+Ntraj = 300;
 x_traj = cell(Ntraj, 1);
 for i = 1:Ntraj
-% x0_curr = x0;
-x0_curr = [R0*sphere_sample(1, 2)'; 0; 0] + x0;
+x0_curr = x0;
+% x0_curr = [R0*(2*rand(2, 1) - 1); 0; 0] + x0;
 [x_traj{i},W,TE,YE,WE,IE] = sde_euler(f,g,0:param.dt:Tmax,...
         x0_curr,opts_fw);
 end
@@ -40,40 +41,69 @@ end
 figure(3)
 clf
 hold on
-%generate patches
-% theta_half_range = linspace(theta_c-pi/2, theta_c + pi/2, 200);
-% circ_half = [cos(theta_half_range); sin(theta_half_range)];
-% Xu = Cu + circ_half* Ru;
-% 
-% theta_full = linspace(0, 2*pi, 200);        
-% patch(Xu(1, :), Xu(2, :), zeros(size(Xu(1, :))), 'r', 'Linewidth', 3, 'EdgeColor', 'none')
 
 for i = 1:Ntraj
     x_curr = x_traj{i};
     plot(x_curr(:, 1), x_curr(:, 2), 'c');
+    plot(x_curr(:,3), x_curr(:, 4), 'r');
+    % plot(x_curr(:, 5), x_curr(:, 6), 'g');
 end
-xl = xlim;
-yl = ylim;
-fcontour(@(x, y) 1 - cos(x).*cos(y) - sin(x).*sin(y), [xl, yl], 'levellist', [synclim], 'linecolor', 'r')
-
-
-
-xlabel('\theta_1')
-ylabel('\theta_2')
+xlabel('position')
+ylabel('velocity')
 axis square
-% title('Sampled Trajectories', 'FontSize', 16)
+% xl = [-Xmax, Xmax];
+% yl = [-Xmax, Xmax];
 
+% patch(R0*[-1, -1, 1, 1, -1], R0*[-1, 1, 1, -1, -1], 'm', 'EdgeColor', 'none');
+
+% fcontour(@(x, y) 1 - cos(x).*cos(y) - sin(x).*sin(y), [xl, yl], 'levellist', [synclim], 'linecolor', 'r')
+% xlim(xl);
+% ylim(yl);
+
+
+
+% title('Sampled Trajectories', 'FontSize', 16)
+% 
 figure(5)
 clf
 hold on
 for i = 1:Ntraj
     x_curr = x_traj{i};
-    % plot((cos(x_curr(:, 1))- cos(x_curr(:, 2))).^2 + (sin(x_curr(:, 1))- sin(x_curr(:, 2))).^2, 'c');
-
-plot(1- (cos(x_curr(:, 1)).*cos(x_curr(:, 2))) + (sin(x_curr(:, 1)).*sin(x_curr(:, 2))), 'c');
-
+    plot(dt*(1:length(x_curr(:, 3))), x_curr(:, 3) - x_curr(:, 1), 'c');
+%     % plot((cos(x_curr(:, 1))- cos(x_curr(:, 2))).^2 + (sin(x_curr(:, 1))- sin(x_curr(:, 2))).^2, 'c');
+% 
+% plot(1- (x_curr(:, 3).*x_curr(:, 4) + x_curr(:, 5).*x_curr(:, 6)), 'c');
+% 
 end
 
+Ru = 0.15;
+% xl = xlim
+plot([0, T], [Ru, Ru], '--r', 'LineWidth', 3)
+xlim([0, T])
+ylabel('$x_2(t) - x_1(t)$', 'interpreter', 'latex')
+xlabel('$t$', 'interpreter', 'latex')
+
+function dx = f_dyn(t, x)
+%dynamics for transient stability
+x1 = x(1:2);
+x2 = x(3:4);
+
+k12 = 1;
+k23 = 0.75;
+d12 = 0.5;
+d23 = 0.7;
+
+f12 = k12*((x2(1)-x1(1))-d12);
+
+% f12 = k*(-x1(1)-d);
+% f23 = k*(x3(1)-d);
+
+vd1 = f12 - x1(2);
+vd2 = -x2(1) - x2(2) -f12;
+
+dx = [x1(2); vd1; x2(2); vd2];
+
+end
 
 function [event_eval, terminal, direction] = stoch_event_motion(tp, xp, param)
     %event function for @ode15 or other solver

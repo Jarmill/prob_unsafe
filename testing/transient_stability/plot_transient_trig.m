@@ -5,24 +5,18 @@ rng(1, 'twister')
 
 
 %dynamics
-% sigma = 0.1;
-sigma = 0.05;
-f =  @(t, x) [x(3); x(4); -sin(x(1)) - 0.5*sin(x(1)-x(2))-0.4*x(3);...
-    -0.5*sin(x(2)) - 0.5*sin(x(2)-x(1)) - 0.5*x(2) + 0.05];
-g =  @(t, x) sigma * [0;0; 1; 1];
+sigma = 0.15;
+f =  @(t, x) f_dyn(t, x);
+g =  @(t, x) sigma * [1; 1; 0; 0; 0; 0];
 
 %set geometry
 dt = 1e-3;
 
-%original parameters
-% R0 = 0.15;
-%sigma = 0.15;
-
 % param = struct('Ru', Ru,  'Cu', Cu, 'theta_c', theta_c, 'Xmax', Xmax, 'dt', dt);
 param = struct('dt', dt);
-Tmax = 5;
+Tmax = 8;
 % Tmax = 30;
-R0 = 0.01;
+R0 = 0.15;
 Xmax = 0.8;
 
 
@@ -36,7 +30,7 @@ synclim = 0.2;
 
 
 %% perform sampling
-Ntraj = 100;
+Ntraj = 300;
 x_traj = cell(Ntraj, 1);
 for i = 1:Ntraj
 % x0_curr = x0;
@@ -84,13 +78,26 @@ for i = 1:Ntraj
     x_curr = x_traj{i};
     % plot((cos(x_curr(:, 1))- cos(x_curr(:, 2))).^2 + (sin(x_curr(:, 1))- sin(x_curr(:, 2))).^2, 'c');
 
-cc = cos(x_curr(:, 1)).*cos(x_curr(:, 2));
-ss = sin(x_curr(:, 1)).*sin(x_curr(:, 2));
-
-plot(1- (cc+ss), 'c');
+plot(1- (x_curr(:, 3).*x_curr(:, 4) + x_curr(:, 5).*x_curr(:, 6)), 'c');
 
 end
 
+
+function dx = f_dyn(t, x)
+%dynamics for transient stability
+w = x(1:2);
+c = x(3:4);
+s = x(5:6);
+
+
+sin_diff = s(1)*c(2) - c(1)*s(2);
+fw1 = -s(1) -0.4*w(1) -0.5*(sin_diff);
+fw2 = -0.5*s[2] - 0.5*(-sin_diff) - 0.5*w[2] + 0.05;
+fw = [fw1; fw2];
+f = [fw; s.*w; (-c).*w];
+
+dx = f;
+end
 
 function [event_eval, terminal, direction] = stoch_event_motion(tp, xp, param)
     %event function for @ode15 or other solver
