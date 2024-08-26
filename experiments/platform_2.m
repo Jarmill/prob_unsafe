@@ -1,5 +1,4 @@
-%2d motion when drift term is cons\tant
-
+%floating platform dynamics https://arxiv.org/pdf/2208.10752
 %% variables and dynamics
 t = sdpvar(1,1);
 x = sdpvar(4,1);
@@ -36,12 +35,19 @@ Xu1 = struct('ineq', unsafe_cons_1, 'eq', []);
 Xu1all = struct('ineq', [t*(1-t); Xu1.ineq; Xbox], 'eq', []);
 
 %% polynomials
-%polynomial definition
+%linear system
+% % order = 1; %1.000
+% % order = 2; %0.4371
+% % order = 3; %0.1732
+% % order = 4; %0.1137
+% order = 5;   %0.1118
+
+%nonlinear spring
 % order = 1; %1.000
-% order = 2; %0.4371
-% order = 3; %0.1732
-% order = 4; %0.1137
-order = 5; %
+% order = 2; %   0.9236
+% order = 3; %    0.3068
+order = 4; %
+% order = 5;   %
 
 d = 2*order;
 
@@ -128,9 +134,12 @@ x1 = x(1:2);
 x2 = x(3:4);
 
 k12 = 1;
+k12_c = -0.05;
 d12 = 0.5;
 
-f12 = k12*((x2(1)-x1(1))-d12);
+xdiff = ((x2(1)-x1(1))-d12);
+
+f12 = k12*xdiff + k12_c*xdiff^3;
 % f12 = k*(-x1(1)-d);
 % f23 = k*(x3(1)-d);
 
