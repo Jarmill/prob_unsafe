@@ -42,14 +42,20 @@ Xu1all = struct('ineq', [t*(1-t); Xu1.ineq; Xbox], 'eq', []);
 % % order = 4; %0.1137
 % order = 5;   %0.1118
 
-%nonlinear spring
+%nonlinear spring (point)
 % order = 1; %1.000
 % order = 2; %   0.9236
 % order = 3; %    0.3068
 % order = 4; %0.1344
-order = 5;   %  0.1162
+% order = 5;   %  0.1162
 order = 6; %out of memory
 
+% nonlinear spring (disc)
+% order = 1; %1.000
+% order = 2; %   1.000
+% order = 3; %   1.000
+% order = 4; % 0.9899
+% order = 5;   % 0.9830
 d = 2*order;
 
 [v, cv, mv] = polynomial([t;x], d);
@@ -77,7 +83,7 @@ coeffinit = [];
     if CIRC
         gamma = sdpvar(1, 1);
         objective = gamma;
-        R0 = 0.2;
+        R0 = 0.1;
         X0 = struct('ineq', R0^2 - sum((x-x0).^2), 'eq', []);
         [put_init, consinit, coeffinit] = constraint_psatz(gamma-v0, X0, x, d);
 
